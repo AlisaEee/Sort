@@ -1,0 +1,69 @@
+#include <stdio.h>
+
+int abs(int x){
+    if (x >= 0) return x;
+    return -x;
+}
+
+void insert(int *a, int low,int high){
+  int i = low + 1,elem,loc;
+  while (i <= high) {
+    elem = a[i];
+    loc = i - 1;
+    while ((loc>=low) && (abs(a[loc]) > abs(elem))){
+      a[loc + 1] = a[loc];
+      loc--;
+    }
+    a[loc+1] = elem;
+    i++;
+  }
+}
+
+void merge(int *a, int k, int l, int m) {
+  int ans[m - k + 1];
+  int i = k, j = l + 1,h = 0;
+  
+  while (h < m - k + 1) {
+    if (j <= m && ((i == l + 1) || abs(a[i]) > abs(a[j]))){
+      ans[h] = a[j];
+      j++;
+    }
+    else {
+      ans[h] = a[i];
+      i++;
+    }
+    h++;
+  }
+  int c = 0;
+  for (i = k; i <= m;i++){ 
+    a[i] = ans[c];
+    c+=1;
+  }
+}
+
+void merge_sort_rec(int *a, int low, int high) {
+  if (high - low + 1 < 5) insert(a,low,high); //Если длина меньше 5 запуск insert;
+  else {
+    if (low < high){
+        int mid = (low + high)/2;
+        merge_sort_rec(a, low, mid);
+        merge_sort_rec(a, mid + 1, high);
+        merge(a, low, mid, high);
+        
+    }
+  }
+}
+
+void merge_sort(int *a, int n){
+  merge_sort_rec(a, 0, n-1);
+}
+
+int main() {
+  int i,n;
+  scanf("%d", &n);
+  int arr[n];
+  for (i = 0; i < n;i++) scanf("%d", &arr[i]);
+  merge_sort(arr,n);
+  for (i = 0; i < n;i++) printf("%d ",arr[i]);
+  return 0;
+}

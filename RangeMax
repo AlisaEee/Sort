@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int max(int a, int b)
+{
+	if (a > b) return a;
+	return b;
+}
+
+int query(int *T, int l, int r, int i, int a, int b)
+{
+	int ans = 0, m;
+	if (l == a && r == b) ans = T[i];
+	else
+	{
+		m = (a + b) / 2;
+		if (r <= m) ans = query(T, l, r, 2 *i + 1, a, m);
+		else if (l > m)
+		{
+			ans = query(T, l, r, 2 *i + 2, m + 1, b);
+		}
+		else
+		{
+			ans = max(query(T, l, m, 2 *i + 1, a, m), query(T, m + 1, r, 2 *i + 2, m + 1, b));
+		}
+	}
+
+	return ans;
+}
+
+int segmentTree_query(int *T, int n, int l, int r)
+{
+	return query(T, l, r, 0, 0, n - 1);
+}
+
+void build(int *arr, int i, int a, int b, int *T)
+{
+	if (a == b) T[i] = arr[a];
+	else
+	{
+		int m = (a + b) / 2;
+		build(arr, 2 *i + 1, a, m, T);
+		build(arr, 2 *i + 2, m + 1, b, T);
+		T[i] = max(T[2 *i + 1], T[2 *i + 2]);
+	}
+}
+
+void segmentTree_build(int *arr, int *T, int n)
+{
+	int *tree = (int*) malloc(4 *n* sizeof(int));
+	build(arr, 0, 0, n - 1, tree);
+	for (int i = 0; i < 4 * n; i++) T[i] = tree[i];
+	free(tree);
+}
+
+void update(int j, int x, int i, int a, int b, int *T)
+{
+	if (a == b) T[i] = x;
+	else
+	{
+		int m = (a + b) / 2;
+		if (j <= m) update(j, x, 2 *i + 1, a, m, T);
+		else
+			update(j, x, 2 *i + 2, m + 1, b, T);
+		T[i] = max(T[2 *i + 1], T[2 *i + 2]);
+	}
+}
+
+void segmentTree_update(int j, int x, int n, int *T)
+{
+	update(j, x, 0, 0, n - 1, T);
+}
+
+int main()
+{
+	long int n;
+	scanf("%ld", &n);
+	int a[n];
+	int *T = (int*) malloc(4 *n* sizeof(int));
+	for (int i = 0; i < n; i++) scanf("%d", &a[i]);
+	segmentTree_build(a, T, n);
+	char task[3];
+	int x, y;
+	scanf("%s %d %d", task, &x, &y);
+	while (strcmp(task, "END") != 0)
+	{
+		if (strcmp(task, "UPD") == 0)
+		{
+			segmentTree_update(x, y, n, T);
+		}
+		else
+		{
+			printf("%d\n", segmentTree_query(T, n, x, y));
+		}
+
+		scanf("%s %d %d", task, &x, &y);
+	}
+
+	free(T);
+	return 0;
+}

@@ -1,0 +1,135 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int max(int a, int b)
+{
+	return (a > b) ? a : b;
+}
+
+void suffix(char *s, int *a, int n)
+{
+	a[n - 1] = n - 1;
+	int t = n - 1;
+	int i = n - 2;
+	while (i >= 0)
+	{
+		while ((t < n - 1) && s[t] != s[i])
+		{
+			t = a[t + 1];
+		}
+
+		if (s[t] == s[i]) t--;
+		a[i] = t;
+		i--;
+	}
+}
+
+int *delta1(char *s, int *a1, int size)
+{
+	int n = strlen(s);
+	int a = 0;
+	while (a < size)
+	{
+		a1[a] = -1;
+		a++;
+	}
+
+	int j = 0;
+	while (j < n)
+	{
+		a1[(int) s[j]] = n - j - 1;
+		j++;
+	}
+}
+
+int *delta2(char *s, int *a2)
+{
+	int n = strlen(s);
+	int a[n];
+	suffix(s, a, n);
+	int i = 0, t = a[0];
+	while (i < n)
+	{
+		while (t < i)
+			t = a[t + 1];
+		a2[i] = -i + t + n;
+		i++;
+	}
+
+	i = 0;
+	while (i < n - 1)
+	{
+		t = i;
+		while (t < n - 1)
+		{
+			t = a[t + 1];
+			if (s[i] != s[t])
+				a2[t] = -i - 1 + n;
+		}
+
+		i++;
+	}
+
+	return a2;
+
+}
+
+char *bmall(char *s, int size, char *T, int *last, char *str)
+{
+	int n = strlen(s), t = strlen(T);
+	int a1[size];
+	delta1(s, a1, size);
+	int a2[n];
+	delta2(s, a2);
+	int k = n - 1;
+	while (k < t)
+	{
+		int i = n - 1;
+		while (T[k] == s[i])
+		{
+			if (i == 0)
+			{
+				int save = k;
+				k += *last;
+				*last += save + 1;
+				int l = 0;
+				for (int h = save + 1; h < t; h++)
+				{
+					str[l] = T[h];
+					l++;
+				}
+
+				str[l] = '\0';
+				printf("%d\n", k);
+
+				return str;
+			}
+
+			i--;
+			k--;
+		}
+
+		k += max(a1[T[k]], a2[i]);
+	}
+
+	str = "";
+	return str;
+}
+
+int main(int argc, char **argv)
+{
+	char *s = argv[1];
+	char *t = argv[2];
+	int last = 0;
+	char *str = calloc((strlen(t)), sizeof(char));
+	while (strlen(t) >= strlen(s))
+	{
+		t = bmall(s, 256, t, &last, str);
+	}
+
+	free(str);
+	int ok = 0;
+
+	return 0;
+}
